@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity() {
         val buttonMinus = findViewById<Button>(R.id.buttonMinus)
         val buttonPlus = findViewById<Button>(R.id.buttonPlus)
 
-        val listener = View.OnClickListener { v ->
-            val b = v as Button
+        val listener = View.OnClickListener {
+            val b = it as Button
             newNumber.append(b.text)
         }
 
@@ -57,5 +57,25 @@ class MainActivity : AppCompatActivity() {
         button8.setOnClickListener(listener)
         button9.setOnClickListener(listener)
         buttonDot.setOnClickListener(listener)
+
+        val operationListener = View.OnClickListener {
+            val operation = (it as Button).text.toString()
+            val value = newNumber.text.toString()
+            if (value.isNotEmpty()) {
+                performOperation(value, operation)
+            }
+            pendingOperation = operation
+            displayOperation.text = pendingOperation
+        }
+
+        buttonEquals.setOnClickListener(operationListener)
+        buttonDivide.setOnClickListener(operationListener)
+        buttonMultiply.setOnClickListener(operationListener)
+        buttonMinus.setOnClickListener(operationListener)
+        buttonPlus.setOnClickListener(operationListener)
+    }
+
+    private fun performOperation(value: String, operation: String) {
+        displayOperation.text = operation
     }
 }
