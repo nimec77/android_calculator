@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import java.lang.NumberFormatException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var result: EditText
@@ -13,7 +14,6 @@ class MainActivity : AppCompatActivity() {
     private val displayOperation by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.operation) }
 
     private var operand1: Double? = null
-    private var operand2: Double = 0.0
     private var pendingOperation = "="
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,10 +60,14 @@ class MainActivity : AppCompatActivity() {
 
         val operationListener = View.OnClickListener {
             val operation = (it as Button).text.toString()
-            val value = newNumber.text.toString()
-            if (value.isNotEmpty()) {
+            try {
+                val value = newNumber.text.toString().toDouble()
                 performOperation(value, operation)
+
+            } catch (e: NumberFormatException) {
+                newNumber.setText("")
             }
+
             pendingOperation = operation
             displayOperation.text = pendingOperation
         }
@@ -75,24 +79,23 @@ class MainActivity : AppCompatActivity() {
         buttonPlus.setOnClickListener(operationListener)
     }
 
-    private fun performOperation(value: String, operation: String) {
+    private fun performOperation(value: Double, operation: String) {
         if (operand1 == null) {
-            operand1 = value.toDouble()
+            operand1 = value
         } else {
-            operand2 = value.toDouble()
             if (pendingOperation == "=") {
                 pendingOperation = operation
             }
             when (pendingOperation) {
-                "=" -> operand1 = operand2
-                "/" -> operand1 = if (operand2 == 0.0) {
+                "=" -> operand1 = value
+                "/" -> operand1 = if (value == 0.0) {
                     Double.NaN
                 } else {
-                    operand1!! / operand2
+                    operand1!! / value
                 }
-                "*" -> operand1 = operand1!! * operand2
-                "-" -> operand1 = operand1!! - operand2
-                "+" -> operand1 = operand1!! + operand2
+                "*" -> operand1 = operand1!! * value
+                "-" -> operand1 = operand1!! - value
+                "+" -> operand1 = operand1!! + value
             }
         }
         result.setText(operand1.toString())
